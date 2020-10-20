@@ -83,8 +83,45 @@ public class EksamenSBinTre<T> {
         return antall == 0;
     }
 
+
+    /*
+    * boolean leggInn(T verdi)
+    *
+    * if verdi == null, then we want to return false, as a null value isn't allowed.
+    * through the function we create a node current and a node next which we use to check our values.
+    *
+    * We use a loop until we hit a null pointer, then we compare the values at the next pointer and use our compare
+    * variable to check if we want to place the new node to the left or right of our current position.
+    *
+    * We then increase the antall variable so that we at all times can know how many nodes exists in our tree.
+    *
+    * @return boolean
+    * */
     public boolean leggInn(T verdi) {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        if (verdi.equals(null))
+            return false;
+
+        Node<T> current = rot, next = null;
+        int compare = 0;
+
+        while (current != null) {
+            next = current;
+            compare = comp.compare(verdi, current.verdi);
+            current = (compare < 0) ? current.venstre : current.høyre;
+        }
+
+        current = new Node<T>(verdi, next);
+
+        if (next == null)
+            rot = current;
+        else if(compare < 0)
+            next.venstre = current;
+        else
+            next.høyre = current;
+        antall++;
+        endringer++;
+
+        return true;
     }
 
     public boolean fjern(T verdi) {
@@ -96,7 +133,25 @@ public class EksamenSBinTre<T> {
     }
 
     public int antall(T verdi) {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        if (verdi.equals(null))
+            return 0;
+
+        int amount = 0;
+        int compare = 0;
+
+        Node<T> h = rot;
+
+        while (h != null) {
+            compare = comp.compare(verdi, h.verdi);
+            if (h.verdi.equals(verdi)) {
+                amount++;
+            }
+
+            h = (compare < 0) ? h.venstre : h.høyre;
+        }
+
+
+        return amount;
     }
 
     public void nullstill() {
