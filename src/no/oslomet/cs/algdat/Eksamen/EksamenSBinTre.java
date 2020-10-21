@@ -1,10 +1,7 @@
 package no.oslomet.cs.algdat.Eksamen;
 
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.StringJoiner;
+import java.util.*;
 
 public class EksamenSBinTre<T> {
     private static final class Node<T>   // en indre nodeklasse
@@ -120,18 +117,64 @@ public class EksamenSBinTre<T> {
             next.høyre = current;
         antall++;
         endringer++;
-
         return true;
     }
 
     public boolean fjern(T verdi) {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        if (verdi == null) return false;  // treet har ingen nullverdier
+
+        Node<T> p = rot, q = null;   // q skal være forelder til p
+
+        while (p != null)            // leter etter verdi
+        {
+            int cmp = comp.compare(verdi,p.verdi);      // sammenligner
+            if (cmp < 0) { q = p; p = p.venstre; }      // går til venstre
+            else if (cmp > 0) { q = p; p = p.høyre; }   // går til høyre
+            else break;    // den søkte verdien ligger i p
+        }
+        if (p == null) return false;   // finner ikke verdi
+
+        if (p.venstre == null || p.høyre == null)  // Tilfelle 1) og 2)
+        {
+            Node<T> b = p.venstre != null ? p.venstre : p.høyre;  // b for barn
+            if (p == rot) rot = b;
+            else if (p == q.venstre) q.venstre = b;
+            else q.høyre = b;
+        }
+        else  // Tilfelle 3)
+        {
+            Node<T> s = p, r = p.høyre;   // finner neste i inorden
+            while (r.venstre != null)
+            {
+                s = r;    // s er forelder til r
+                r = r.venstre;
+            }
+
+            p.verdi = r.verdi;   // kopierer verdien i r til p
+
+            if (s != p) s.venstre = r.høyre;
+            else s.høyre = r.høyre;
+        }
+
+        antall--;   // det er nå én node mindre i treet
+        return true;
     }
 
     public int fjernAlle(T verdi) {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
-    }
+        int amount = 0;
 
+
+
+        return amount;
+    }
+    /*
+    * antall(T verdi)
+    *
+    * count the amount of times a certain value is found in the binary tree.
+    * Use the comparator to see which branch you should go to next.
+    *
+    *
+    * */
     public int antall(T verdi) {
         if (verdi.equals(null))
             return 0;
@@ -154,20 +197,66 @@ public class EksamenSBinTre<T> {
         return amount;
     }
 
+    /*
+    * nullstill() uses the private nullstill(Node<T> p) function to remove everything within the tree.
+    * */
     public void nullstill() {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        // Base Case
+        if (rot == null)
+            return;
+
+        // Create an empty queue for level order traversal
+        Queue<Node> q = new LinkedList<Node>();
+
+        // Do level order traversal starting from root
+        q.add(rot);
+        while (!q.isEmpty())
+        {
+            Node node = q.peek();
+            q.poll();
+
+            if (node.venstre != null) {
+                q.add(node.venstre);
+            } if (node.høyre != null) {
+                q.add(node.høyre);
+            }
+        }
+        antall--;
+        rot = null;
     }
 
     private static <T> Node<T> førstePostorden(Node<T> p) {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        Node<T> temp = p;
+        if (p.venstre == null && p.høyre == null) return p;
+        while (true) {
+            if (temp.venstre != null) temp = temp.venstre;
+            else if (temp.høyre != null) temp = temp.høyre;
+            else return temp;
+        }
     }
 
     private static <T> Node<T> nestePostorden(Node<T> p) {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        Node<T> temp = p.forelder;
+        if (p.forelder == null) return null;
+
+        if (temp.høyre == p || temp.høyre == null) return temp;
+
+        temp = temp.høyre;
+        while (temp.venstre != null)
+            temp = temp.venstre;
+
+        return temp;
+
     }
 
     public void postorden(Oppgave<? super T> oppgave) {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        Node<T> f = førstePostorden(rot);
+
+        while (f != null) {
+            oppgave.utførOppgave(f.verdi);
+            f = nestePostorden(f);
+        }
+
     }
 
     public void postordenRecursive(Oppgave<? super T> oppgave) {
@@ -175,15 +264,60 @@ public class EksamenSBinTre<T> {
     }
 
     private void postordenRecursive(Node<T> p, Oppgave<? super T> oppgave) {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        if (p.venstre != null) postordenRecursive(p.venstre, oppgave);
+        if (p.høyre != null) postordenRecursive(p.høyre, oppgave);
+        oppgave.utførOppgave(p.verdi);
     }
 
     public ArrayList<T> serialize() {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        ArrayList<T> ret = new ArrayList<>();
+        ArrayDeque<Node<T>> que = new ArrayDeque<>();
+
+        que.add(rot);
+        while (!que.isEmpty()) {
+
+            int nc = que.size();
+            if (nc == 0) break;
+
+            while (nc > 0) {
+                Node<T> n = que.peek();
+                ret.add(n.verdi);
+                que.remove();
+                if (n.venstre != null)
+                    que.add(n.venstre);
+                if (n.høyre != null)
+                    que.add(n.høyre);
+                nc--;
+            }
+        }
+        return ret;
     }
 
     static <K> EksamenSBinTre<K> deserialize(ArrayList<K> data, Comparator<? super K> c) {
-        throw new UnsupportedOperationException("Ikke kodet ennå!");
+        EksamenSBinTre<K> ret = new EksamenSBinTre<>(c);
+
+        for (K i: data) {
+            ret.leggInn(i);
+        }
+
+        return ret;
+    }
+
+    private Node<T> findmin(Node<T> node) {
+        Node<T> min = node;
+        Node<T> next = min.høyre;
+        int compare = 0;
+
+        while (min != null) {
+            compare = comp.compare(min.verdi, next.verdi);
+            if (compare < 0 ) {
+                min = next;
+            }
+
+            next = (compare < 0) ? next.venstre : next.høyre;
+        }
+
+        return node;
     }
 
 
