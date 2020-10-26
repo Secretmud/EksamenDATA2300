@@ -16,5 +16,9 @@ Se oblig-tekst for alle krav, og husk spesielt på følgende:
 
 Vi har brukt git til å dokumentere arbeidet vårt. Jeg har 16 commits totalt, og hver logg-melding beskriver det jeg har gjort av endringer.
 
-* Oppgave 1: Løste ved å implementere ...
-* Oppgave 2: ...
+### Oppgave 1
+Blir løst ved å implementere traversering igjennom treet frem til du ender som en blad-node. 
+For hver sjekk bruker jeg comparison til å se om jeg skal legge ned nye noden som en blad-node til høyre eller venstre.
+### Oppgave 2
+Samme som over implementerer jeg traversering med en kompirator, og for hvergang jeg treffer en node som har den verdien så inkrementerer jeg en 
+variable amount som tilslutt blir returnert.
