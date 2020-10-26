@@ -98,72 +98,104 @@ public class EksamenSBinTre<T> {
         if (verdi.equals(null))
             return false;
 
-        Node<T> current = rot, next = null;
+        Node<T> current = rot, parent = null;
         int compare = 0;
-
+        boolean min = true;
         while (current != null) {
-            next = current;
+            parent = current;
             compare = comp.compare(verdi, current.verdi);
             current = (compare < 0) ? current.venstre : current.høyre;
+            min = (compare < 0) ? true : false;
         }
+        current = new Node<T>(verdi, parent);
 
-        current = new Node<T>(verdi, next);
-
-        if (next == null)
+        if (rot == null)
             rot = current;
-        else if(compare < 0)
-            next.venstre = current;
+        else if(min)
+            parent.venstre = current;
         else
-            next.høyre = current;
+            parent.høyre = current;
         antall++;
         endringer++;
         return true;
+
     }
 
     public boolean fjern(T verdi) {
-        if (verdi == null) return false;  // treet har ingen nullverdier
-
-        Node<T> p = rot, q = null;   // q skal være forelder til p
-
-        while (p != null)            // leter etter verdi
-        {
-            int cmp = comp.compare(verdi,p.verdi);      // sammenligner
-            if (cmp < 0) { q = p; p = p.venstre; }      // går til venstre
-            else if (cmp > 0) { q = p; p = p.høyre; }   // går til høyre
-            else break;    // den søkte verdien ligger i p
-        }
-        if (p == null) return false;   // finner ikke verdi
-
-        if (p.venstre == null || p.høyre == null)  // Tilfelle 1) og 2)
-        {
-            Node<T> b = p.venstre != null ? p.venstre : p.høyre;  // b for barn
-            if (p == rot) rot = b;
-            else if (p == q.venstre) q.venstre = b;
-            else q.høyre = b;
-        }
-        else  // Tilfelle 3)
-        {
-            Node<T> s = p, r = p.høyre;   // finner neste i inorden
-            while (r.venstre != null)
-            {
-                s = r;    // s er forelder til r
-                r = r.venstre;
+        if (verdi == null) return false;
+        Node<T> current = rot, parent = rot;
+        boolean less = true;
+        int cmp;
+        while (current.verdi != verdi) {
+            parent = current;
+            cmp = comp.compare(verdi, current.verdi);
+            if (cmp < 0) {
+                less = true;
+                current = current.venstre;
+            } else {
+                less = false;
+                current = current.høyre;
             }
 
-            p.verdi = r.verdi;   // kopierer verdien i r til p
-
-            if (s != p) s.venstre = r.høyre;
-            else s.høyre = r.høyre;
+            if (current == null) return false;
         }
 
+        if (current.venstre == null && current.høyre == null) {
+            if (current == rot) {
+                rot = null;
+            } else if (less) {
+                parent.venstre = null;
+            } else {
+                parent.høyre = null;
+            }
+        } else if (current.høyre == null) {
+            if (current == rot) {
+                rot = current.venstre;
+            } else if (less) {
+                parent.venstre = current.venstre;
+            } else {
+                parent.høyre = current.venstre;
+            }
+        } else if (current.venstre == null) {
+            if (current == rot) {
+                rot = current.høyre;
+            } else if (less) {
+                parent.venstre = current.høyre;
+            } else {
+                parent.venstre = current.venstre;
+            }
+        } else {
+            Node<T> replacement = findmin(current);
+
+            if (current == rot) {
+                rot = replacement;
+            } else if (less) {
+                parent.venstre = replacement;
+            } else {
+                parent.høyre = replacement;
+            }
+
+            replacement.venstre = current.venstre;
+        }
         antall--;   // det er nå én node mindre i treet
         return true;
     }
 
+    /*
+    * fjernAlle(verdi)
+    *
+    * Remove every instance of a value using fjern(verdi).
+    *
+    * This isn't the best way, but I will change this at a later time.
+    *
+    * */
     public int fjernAlle(T verdi) {
         int amount = 0;
-
-
+        boolean remove = true;
+        while (remove) {
+            amount += fjern(verdi) ? 1 : 0;
+            remove = fjern(verdi);
+        }
 
         return amount;
     }
@@ -245,6 +277,7 @@ public class EksamenSBinTre<T> {
         while (temp.venstre != null)
             temp = temp.venstre;
 
+        System.out.println(temp.verdi);
         return temp;
 
     }
@@ -304,20 +337,23 @@ public class EksamenSBinTre<T> {
     }
 
     private Node<T> findmin(Node<T> node) {
-        Node<T> min = node;
-        Node<T> next = min.høyre;
-        int compare = 0;
+        Node<T> minParent = node;
+        Node<T> minNew = node;
+        Node<T> current = node.høyre;
 
-        while (min != null) {
-            compare = comp.compare(min.verdi, next.verdi);
-            if (compare < 0 ) {
-                min = next;
-            }
-
-            next = (compare < 0) ? next.venstre : next.høyre;
+        while (current != null) {
+            minParent = minNew;
+            minNew = current;
+            current = current.venstre;
         }
 
-        return node;
+        if (minNew != node.høyre) {
+            minParent.venstre = minNew.høyre;
+            minNew.høyre = node.høyre;
+        }
+
+
+        return minNew;
     }
 
 

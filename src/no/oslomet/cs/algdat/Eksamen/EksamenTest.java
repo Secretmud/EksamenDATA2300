@@ -169,7 +169,7 @@ public class EksamenTest {
                 new EksamenSBinTre<>(Comparator.naturalOrder());
 
         // legger inn verdier i treet
-        int[] a = {10, 6, 14, 1, 8, 12, 3, 7, 9, 11, 13, 2, 5, 4};
+        int[] a = {6, 3, 9, 1, 5, 7, 10, 2, 4, 8, 11, 6, 8};
         for (int verdi : a) tre.leggInn(verdi);
 
         //Denne lambda-funksjonen skriver ut mellomrom før nodens verdi.
@@ -227,8 +227,10 @@ public class EksamenTest {
         }
 
         int[] a = {6, 3, 9, 1, 5, 7, 10, 2, 4, 8, 11, 6, 8};
-        for (int verdi : a) tre.leggInn(verdi);
-
+        for (int verdi : a) {
+            System.out.println(tre.antall());
+            tre.leggInn(verdi);
+        }
         boolean fjernet = tre.fjern(12);
         s = tre.toStringPostOrder();
 
@@ -376,7 +378,7 @@ public class EksamenTest {
             antallFeil++;
             System.out.println("Oppgave 6u: Feil i fjernAlle(T)!");
         }
-
+        /*
         tre = new EksamenSBinTre<>(Comparator.naturalOrder());
 
         Random r = new Random();
@@ -392,6 +394,7 @@ public class EksamenTest {
             System.out.println("nullstille hode og antall? Alle nodeverdier og");
             System.out.println("pekere i treet skal nulles!");
         }
+        */
         assertEquals(antallFeil, 0);
     }  // slutt på Oppgave 5
 
