@@ -190,6 +190,11 @@ public class EksamenSBinTre<T> {
     *
     * */
     public int fjernAlle(T verdi) {
+        if (rot == null) return 0;
+        if (rot.høyre == null && rot.venstre == null) {
+            rot = null;
+            return 1;
+        }
         int amount = 0;
         boolean remove = true;
         while (remove) {
@@ -244,6 +249,7 @@ public class EksamenSBinTre<T> {
         q.add(rot);
         while (!q.isEmpty())
         {
+            antall--;
             Node node = q.peek();
             q.poll();
 
@@ -253,7 +259,7 @@ public class EksamenSBinTre<T> {
                 q.add(node.høyre);
             }
         }
-        antall--;
+
         rot = null;
     }
 
@@ -268,18 +274,20 @@ public class EksamenSBinTre<T> {
     }
 
     private static <T> Node<T> nestePostorden(Node<T> p) {
-        Node<T> temp = p.forelder;
-        if (p.forelder == null) return null;
+        Node<T> parent = p.forelder;
+        if (parent == null) return null;
 
-        if (temp.høyre == p || temp.høyre == null) return temp;
-
-        temp = temp.høyre;
-        while (temp.venstre != null)
-            temp = temp.venstre;
-
-        System.out.println(temp.verdi);
-        return temp;
-
+        if (parent.høyre != null && parent.høyre != p) {
+            Node<T> current = parent.høyre;
+            while (true) {
+                if (current.venstre != null) current = current.venstre;
+                else if (current.høyre != null) current = current.høyre;
+                else break;
+            }
+            return current;
+        } else {
+            return parent;
+        }
     }
 
     public void postorden(Oppgave<? super T> oppgave) {
