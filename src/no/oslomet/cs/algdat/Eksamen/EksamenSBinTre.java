@@ -122,63 +122,85 @@ public class EksamenSBinTre<T> {
     }
 
     public boolean fjern(T verdi) {
-        if (verdi == null) return false;
-        Node<T> current = rot, parent = rot;
-        boolean less = true;
-        int cmp;
+        Node<T> current = rot;
+        int children;
         while (current.verdi != verdi) {
-            parent = current;
-            cmp = comp.compare(verdi, current.verdi);
-            if (cmp < 0) {
-                less = true;
+            if (comp.compare(verdi, current.verdi) < 0)
                 current = current.venstre;
-            } else {
-                less = false;
+            else
                 current = current.høyre;
-            }
-
-            if (current == null) return false;
+            if (current == null)
+                return false;
         }
+        if (current.venstre == null && current.høyre == null) children = 0;
+        else if (current.høyre == null) children = 1;
+        else if (current.venstre == null) children = 1;
+        else children = 2;
+        switch (children) {
+            case 0:
+                System.out.println("Leaf");
+                remove_leaf(current);
+                return true;
+            case 1:
+                System.out.println("One-child");
+                remove_one_child(current);
+                return true;
+            case 2:
+                System.out.println("Two-children");
+                remove_two_children(current);
+                return true;
+            default:
+                return false;
+        }
+    }
 
-        if (current.venstre == null && current.høyre == null) {
-            if (current == rot) {
-                rot = null;
-            } else if (less) {
-                parent.venstre = null;
-            } else {
-                parent.høyre = null;
-            }
-        } else if (current.høyre == null) {
+    private void remove_two_children(Node<T> current) {
+        Node<T> parent = current.forelder;
+
+        Node successor = findmin(current);
+        if (current == rot) {
+            rot = successor;
+        } else if (comp.compare(current.verdi, parent.verdi) < 0) {
+            parent.venstre = successor;
+        } else {
+            parent.høyre = successor;
+        }
+        successor.venstre = current.venstre;
+        antall--;
+    }
+
+    private void remove_one_child(Node<T> current) {
+        Node<T> parent = current.forelder;
+
+        if (current.høyre == null) {
             if (current == rot) {
                 rot = current.venstre;
-            } else if (less) {
+            } else if (comp.compare(current.verdi, parent.verdi) < 0) {
                 parent.venstre = current.venstre;
             } else {
                 parent.høyre = current.venstre;
             }
-        } else if (current.venstre == null) {
+        } else {
             if (current == rot) {
                 rot = current.høyre;
-            } else if (less) {
+            } else if (comp.compare(current.verdi, parent.verdi) < 0) {
                 parent.venstre = current.høyre;
             } else {
-                parent.venstre = current.venstre;
+                parent.høyre = current.høyre;
             }
-        } else {
-            Node<T> replacement = findmin(current);
-
-            if (current == rot) {
-                rot = replacement;
-            } else if (less) {
-                parent.venstre = replacement;
-            } else {
-                parent.høyre = replacement;
-            }
-
-            replacement.venstre = current.venstre;
         }
-        antall--;   // det er nå én node mindre i treet
-        return true;
+        antall--;
+    }
+
+    private void remove_leaf(Node<T> current) {
+        Node<T> parent = current.forelder;
+        if (current == rot)
+            rot = null;
+        else if (comp.compare(current.verdi, parent.verdi) < 0)
+            parent.venstre = null;
+        else
+            parent.høyre = null;
+        antall--;
     }
 
     /*
@@ -196,11 +218,13 @@ public class EksamenSBinTre<T> {
             return 1;
         }
         int amount = 0;
-        boolean remove = true;
-        while (remove) {
-            amount += fjern(verdi) ? 1 : 0;
-            remove = fjern(verdi);
+        int count = antall(verdi);
+        for (int i = 0; i < count; i++) {
+            fjern(verdi);
+            amount++;
         }
+
+        System.out.println(verdi + " " + amount);
 
         return amount;
     }
@@ -345,23 +369,22 @@ public class EksamenSBinTre<T> {
     }
 
     private Node<T> findmin(Node<T> node) {
-        Node<T> minParent = node;
-        Node<T> minNew = node;
-        Node<T> current = node.høyre;
-
+        Node successor = null;
+        Node successorParent = null;
+        Node current = node.høyre;
         while (current != null) {
-            minParent = minNew;
-            minNew = current;
+            successorParent = successor;
+            successor = current;
             current = current.venstre;
         }
-
-        if (minNew != node.høyre) {
-            minParent.venstre = minNew.høyre;
-            minNew.høyre = node.høyre;
+        //check if successor has the right child, it cannot have left child for sure
+        // if it does have the right child, add it to the left of successorParent.
+        // successorParent
+        if (successor != node.høyre) {
+            successorParent.venstre = successor.høyre;
+            successor.høyre = node.høyre;
         }
-
-
-        return minNew;
+        return successor;
     }
 
 
