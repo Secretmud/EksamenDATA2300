@@ -16,7 +16,7 @@ Se oblig-tekst for alle krav, og husk spesielt på følgende:
 
 Jeg har brukt git hensiktsmessig, ble litt lite commits i starten da jeg kom inn i en sone der jeg bare satt og kodet. Men har prøvd å veie opp for dette underveis i eksamen. Alle testene passerer, og klassen EksamenSBinTre.java ligger i riktig path.
 
-Totalt ble det # commits. 
+Totalt ble det 17 commits. 
 
 Det er 5 warnings i oppgaven som levers inn, mye av det koker ned til at det er tatt i brukt ø i koden som vi fikk utdelt, jeg valgte derfor å ikke gjøre om denne.
 
