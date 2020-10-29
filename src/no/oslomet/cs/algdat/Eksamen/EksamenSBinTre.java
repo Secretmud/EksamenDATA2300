@@ -121,6 +121,17 @@ public class EksamenSBinTre<T> {
 
     }
 
+
+    /*
+    * fjern(verdi)
+    *
+    * Firstly we iterate through the tree until we find the correct node.
+    *
+    * We then check if the node has 0, 1 or 2 children.
+    *
+    * Using a switch statement we go into the correct sub-method that handles the deletion of nodes.
+    * */
+
     public boolean fjern(T verdi) {
         Node<T> current = rot;
         int children;
@@ -133,66 +144,59 @@ public class EksamenSBinTre<T> {
                 return false;
         }
         if (current.venstre == null && current.høyre == null) children = 0;
-        else if (current.høyre == null) children = 1;
-        else if (current.venstre == null) children = 1;
+        else if (current.høyre == null || current.venstre == null) children = 1;
         else children = 2;
         switch (children) {
             case 0:
-                System.out.println("Leaf");
-                remove_leaf(current);
+                removeLeaf(current);
                 return true;
             case 1:
-                System.out.println("One-child");
-                remove_one_child(current);
+                removeNodeWithOneChild(current);
                 return true;
             case 2:
-                System.out.println("Two-children");
-                remove_two_children(current);
+                removeNodeWithTwoChildren(current);
                 return true;
             default:
                 return false;
         }
     }
 
-    private void remove_two_children(Node<T> current) {
+    /*
+    * remove_two_children(current)
+    *
+    *
+    *
+    * */
+
+    private void removeNodeWithTwoChildren(Node<T> current) {
         Node<T> replacement = findmin(current);
-
-        System.out.println(replacement.forelder + " " + replacement);
-
-        if (current == rot) {
-            rot = replacement;
-            replacement.forelder = null;
-        }
-
-        Node<T> parent = current.forelder;
-
+        Node<T> left = current.venstre;
+        Node<T> right = current.høyre;
+        current = replacement;
+        current.venstre = left;
+        current.høyre = right;
         antall--;
     }
 
-    private void remove_one_child(Node<T> current) {
+    private void removeNodeWithOneChild(Node<T> current) {
+        int cmp = (current.venstre != null) ? -1 : 1;
+        Node<T> child = (cmp < 0) ? current.venstre : current.høyre;
         if (current == rot) {
-            if (rot.høyre != null) rot = rot.høyre;
-            else rot = rot.venstre;
-        }
-
-        if (current != rot) {
+            rot = child;
+            child.forelder = null;
+        } else if (current != rot) {
             Node<T> parent = current.forelder;
-            int cmp = (current.venstre == null) ? 1 : -1;
-            Node<T> child = (cmp < 0) ? current.venstre : current.høyre;
             if (parent.venstre == current) {
                 parent.venstre = child;
             } else {
                 parent.høyre = child;
             }
-            System.out.println(parent + " " + child + " " + cmp);
             child.forelder = parent;
         }
-
-
         antall--;
     }
 
-    private void remove_leaf(Node<T> current) {
+    private void removeLeaf(Node<T> current) {
         Node<T> parent = current.forelder;
         if (current == rot)
             rot = null;
@@ -203,12 +207,32 @@ public class EksamenSBinTre<T> {
         antall--;
     }
 
+    private Node<T> findmin(Node<T> node) {
+        Node<T> current = node.høyre;
+        Node<T> parent = node.forelder;
+
+        if (current.venstre == null) {
+            parent.høyre = current.høyre;
+            return current;
+        }
+
+        while (current.venstre != null)
+            current = current.venstre;
+
+        parent = current.forelder;
+
+        parent.venstre = (current.høyre != null) ? current.høyre : null;
+        return current;
+
+    }
+
+
     /*
     * fjernAlle(verdi)
     *
     * Remove every instance of a value using fjern(verdi).
     *
-    * This isn't the best way, but I will change this at a later time.
+    * By utilizing the fjern(verdi) method I can reuse code that I had already written. This saves a lot of time.
     *
     * */
     public int fjernAlle(T verdi) {
@@ -366,22 +390,6 @@ public class EksamenSBinTre<T> {
         return ret;
     }
 
-    private Node<T> findmin(Node<T> node) {
-        Node<T> current = node.høyre;
-        System.out.println(current.venstre);
-        if (current.venstre == null) {
-            System.out.println("Getting here");
-            return current;
-        }
-
-        while (current.venstre != null) {
-            System.out.println("Or here");
-            current = current.venstre;
-        }
-        System.out.println(current);
-        return current;
-
-    }
 
 
 } // ObligSBinTre
