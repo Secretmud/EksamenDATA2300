@@ -84,41 +84,38 @@ public class EksamenSBinTre<T> {
     /*
     * boolean leggInn(T verdi)
     *
-    * if verdi == null, then we want to return false, as a null value isn't allowed.
-    * through the function we create a node current and a node next which we use to check our values.
-    *
     * We use a loop until we hit a null pointer, then we compare the values at the next pointer and use our compare
     * variable to check if we want to place the new node to the left or right of our current position.
     *
     * We then increase the antall variable so that we at all times can know how many nodes exists in our tree.
     *
-    * @return boolean
+    * @return boolean, we don't really use the return value. So beyond actual debugging I find this to be useless.
     * */
     public boolean leggInn(T verdi) {
-        if (verdi.equals(null))
-            return false;
+        if (!verdi.equals(null)) {
+            Node<T> current = rot, parent = null;
+            int compare;
+            boolean min = true;
+            while (current != null) {
+                parent = current;
+                compare = comp.compare(verdi, current.verdi);
+                current = (compare < 0) ? current.venstre : current.høyre;
+                min = compare < 0;
+            }
+            current = new Node<>(verdi, parent);
 
-        Node<T> current = rot, parent = null;
-        int compare = 0;
-        boolean min = true;
-        while (current != null) {
-            parent = current;
-            compare = comp.compare(verdi, current.verdi);
-            current = (compare < 0) ? current.venstre : current.høyre;
-            min = (compare < 0) ? true : false;
-        }
-        current = new Node<T>(verdi, parent);
-
-        if (rot == null)
-            rot = current;
-        else if(min)
-            parent.venstre = current;
-        else
-            parent.høyre = current;
-        antall++;
-        endringer++;
-        return true;
-
+            if (rot == null)
+                rot = current;
+            else if(min) {
+                assert parent != null;
+                parent.venstre = current;
+            }
+            else
+                parent.høyre = current;
+            antall++;
+            endringer++;
+            return true;
+        } else return false;
     }
 
 
@@ -162,9 +159,10 @@ public class EksamenSBinTre<T> {
     }
 
     /*
-    * remove_two_children(current)
+    * removeNodeWithTwoChildren(current)
     *
-    *
+    * Using findmin(current) we get the node with the lowest value on the right side of the node tree.
+    * we then append the left and right side of the parent node to the new tree.
     *
     * */
 
@@ -175,8 +173,16 @@ public class EksamenSBinTre<T> {
         current = replacement;
         current.venstre = left;
         current.høyre = right;
+        endringer++;
         antall--;
     }
+
+    /*
+    * removeNodeWithOneChild(current)
+    *
+    * I use two ternary operators here to figure out which, side I have to work with. This saves up a lot of code lines.
+    *
+    * */
 
     private void removeNodeWithOneChild(Node<T> current) {
         int cmp = (current.venstre != null) ? -1 : 1;
@@ -184,7 +190,7 @@ public class EksamenSBinTre<T> {
         if (current == rot) {
             rot = child;
             child.forelder = null;
-        } else if (current != rot) {
+        } else {
             Node<T> parent = current.forelder;
             if (parent.venstre == current) {
                 parent.venstre = child;
@@ -193,9 +199,16 @@ public class EksamenSBinTre<T> {
             }
             child.forelder = parent;
         }
+        endringer++;
         antall--;
     }
-
+    /*
+     * removeLeaf(current)
+     *
+     * This is the simplest type of deletion in a binary tree. We're able to get a way with a small if-else if-else query
+     * and a compare statement to check which of the parents pointers should be set to null.
+     *
+     * */
     private void removeLeaf(Node<T> current) {
         Node<T> parent = current.forelder;
         if (current == rot)
@@ -204,14 +217,21 @@ public class EksamenSBinTre<T> {
             parent.venstre = null;
         else
             parent.høyre = null;
+        endringer++;
         antall--;
     }
 
+    /*
+    * findmin(node)
+    *
+    * find the smallest node on the left side of the node given to the method.
+    * */
     private Node<T> findmin(Node<T> node) {
         Node<T> current = node.høyre;
         Node<T> parent = node.forelder;
 
         if (current.venstre == null) {
+            endringer++;
             parent.høyre = current.høyre;
             return current;
         }
@@ -221,7 +241,8 @@ public class EksamenSBinTre<T> {
 
         parent = current.forelder;
 
-        parent.venstre = (current.høyre != null) ? current.høyre : null;
+        parent.venstre = current.høyre;
+        endringer++;
         return current;
 
     }
@@ -259,21 +280,19 @@ public class EksamenSBinTre<T> {
     *
     * */
     public int antall(T verdi) {
-        if (verdi.equals(null))
-            return 0;
 
         int amount = 0;
-        int compare = 0;
+        int compare;
 
-        Node<T> h = rot;
+        Node<T> current = rot;
 
-        while (h != null) {
-            compare = comp.compare(verdi, h.verdi);
-            if (h.verdi.equals(verdi)) {
+        while (current != null) {
+            compare = comp.compare(verdi, current.verdi);
+            if (current.verdi.equals(verdi)) {
                 amount++;
             }
 
-            h = (compare < 0) ? h.venstre : h.høyre;
+            current = (compare < 0) ? current.venstre : current.høyre;
         }
 
 
@@ -281,34 +300,42 @@ public class EksamenSBinTre<T> {
     }
 
     /*
-    * nullstill() uses the private nullstill(Node<T> p) function to remove everything within the tree.
+    * nullstill()
+    *
+    * I use a queue to add nodes to a LinkedList, I then use a while loop to remove every node.
+    *
+    * I then stop with setting rot = null.
+    *
     * */
     public void nullstill() {
-        // Base Case
         if (rot == null)
             return;
 
-        // Create an empty queue for level order traversal
-        Queue<Node> q = new LinkedList<Node>();
-
-        // Do level order traversal starting from root
-        q.add(rot);
-        while (!q.isEmpty())
+        ArrayDeque<Node<T>> que = new ArrayDeque<>();
+        que.add(rot);
+        while (!que.isEmpty())
         {
+            endringer++;
             antall--;
-            Node node = q.peek();
-            q.poll();
+            Node<T> node = que.peek();
+            que.poll();
 
             if (node.venstre != null) {
-                q.add(node.venstre);
+                que.add(node.venstre);
             } if (node.høyre != null) {
-                q.add(node.høyre);
+                que.add(node.høyre);
             }
         }
 
         rot = null;
     }
 
+    /*
+    * førstePostorden(p)
+    *
+    * Find the node that is one the farside of the left tree. This might not be the leftmost node.
+    *
+    * */
     private static <T> Node<T> førstePostorden(Node<T> p) {
         Node<T> temp = p;
         if (p.venstre == null && p.høyre == null) return p;
@@ -318,6 +345,15 @@ public class EksamenSBinTre<T> {
             else return temp;
         }
     }
+
+    /*
+    * nestePosorden()
+    *
+    * Find the successor of the current node, if the node.foreldre have a right node. then we have to iterate
+    * through a while-loop to find the next postorden node. If there is nothing to the right or the parent.høyre is
+    * the previous element, then we simply return the parent.
+    *
+    * */
 
     private static <T> Node<T> nestePostorden(Node<T> p) {
         Node<T> parent = p.forelder;
@@ -346,6 +382,16 @@ public class EksamenSBinTre<T> {
 
     }
 
+    /*
+    * posordenRecursive(oppgave)
+    *
+    * Uses the private recursive method with the same name, this executes oppgave.utførOppgave(p.verdi) in the correct postorder
+    * format.
+    *
+    * If we placed the oppgave.utførOppgave() at the start we would have iterated preorder, at the center it would be
+    * inorder, but since it's at the end we do it postorder.
+    *
+    * */
     public void postordenRecursive(Oppgave<? super T> oppgave) {
         postordenRecursive(rot, oppgave);
     }
@@ -356,6 +402,14 @@ public class EksamenSBinTre<T> {
         oppgave.utførOppgave(p.verdi);
     }
 
+    /*
+    * serialize()
+    *
+    * Return an ArrayList<T> that has all of the data we need using ArrayDeque and a size variable which keeps ut within a while loop until it reaches 0
+    *
+    * The entire building block is placed within a while that is running our que isn't empty.
+    * */
+
     public ArrayList<T> serialize() {
         ArrayList<T> ret = new ArrayList<>();
         ArrayDeque<Node<T>> que = new ArrayDeque<>();
@@ -364,10 +418,10 @@ public class EksamenSBinTre<T> {
         while (!que.isEmpty()) {
 
             int nc = que.size();
-            if (nc == 0) break;
 
             while (nc > 0) {
                 Node<T> n = que.peek();
+                assert n != null;
                 ret.add(n.verdi);
                 que.remove();
                 if (n.venstre != null)
@@ -379,7 +433,12 @@ public class EksamenSBinTre<T> {
         }
         return ret;
     }
-
+    /*
+    * deserialize(data, c)
+    *
+    * We create a new binary tree object. and then loop over the arraylist data and add everything to the binarytree using the leggInn() from
+    * task 1.
+    * */
     static <K> EksamenSBinTre<K> deserialize(ArrayList<K> data, Comparator<? super K> c) {
         EksamenSBinTre<K> ret = new EksamenSBinTre<>(c);
 
