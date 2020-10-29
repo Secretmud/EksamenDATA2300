@@ -155,40 +155,40 @@ public class EksamenSBinTre<T> {
     }
 
     private void remove_two_children(Node<T> current) {
+        Node<T> replacement = findmin(current);
+
+        System.out.println(replacement.forelder + " " + replacement);
+
+        if (current == rot) {
+            rot = replacement;
+            replacement.forelder = null;
+        }
+
         Node<T> parent = current.forelder;
 
-        Node successor = findmin(current);
-        if (current == rot) {
-            rot = successor;
-        } else if (comp.compare(current.verdi, parent.verdi) < 0) {
-            parent.venstre = successor;
-        } else {
-            parent.høyre = successor;
-        }
-        successor.venstre = current.venstre;
         antall--;
     }
 
     private void remove_one_child(Node<T> current) {
-        Node<T> parent = current.forelder;
-
-        if (current.høyre == null) {
-            if (current == rot) {
-                rot = current.venstre;
-            } else if (comp.compare(current.verdi, parent.verdi) < 0) {
-                parent.venstre = current.venstre;
-            } else {
-                parent.høyre = current.venstre;
-            }
-        } else {
-            if (current == rot) {
-                rot = current.høyre;
-            } else if (comp.compare(current.verdi, parent.verdi) < 0) {
-                parent.venstre = current.høyre;
-            } else {
-                parent.høyre = current.høyre;
-            }
+        if (current == rot) {
+            if (rot.høyre != null) rot = rot.høyre;
+            else rot = rot.venstre;
         }
+
+        if (current != rot) {
+            Node<T> parent = current.forelder;
+            int cmp = (current.venstre == null) ? 1 : -1;
+            Node<T> child = (cmp < 0) ? current.venstre : current.høyre;
+            if (parent.venstre == current) {
+                parent.venstre = child;
+            } else {
+                parent.høyre = child;
+            }
+            System.out.println(parent + " " + child + " " + cmp);
+            child.forelder = parent;
+        }
+
+
         antall--;
     }
 
@@ -223,8 +223,6 @@ public class EksamenSBinTre<T> {
             fjern(verdi);
             amount++;
         }
-
-        System.out.println(verdi + " " + amount);
 
         return amount;
     }
@@ -369,22 +367,20 @@ public class EksamenSBinTre<T> {
     }
 
     private Node<T> findmin(Node<T> node) {
-        Node successor = null;
-        Node successorParent = null;
-        Node current = node.høyre;
-        while (current != null) {
-            successorParent = successor;
-            successor = current;
+        Node<T> current = node.høyre;
+        System.out.println(current.venstre);
+        if (current.venstre == null) {
+            System.out.println("Getting here");
+            return current;
+        }
+
+        while (current.venstre != null) {
+            System.out.println("Or here");
             current = current.venstre;
         }
-        //check if successor has the right child, it cannot have left child for sure
-        // if it does have the right child, add it to the left of successorParent.
-        // successorParent
-        if (successor != node.høyre) {
-            successorParent.venstre = successor.høyre;
-            successor.høyre = node.høyre;
-        }
-        return successor;
+        System.out.println(current);
+        return current;
+
     }
 
 
