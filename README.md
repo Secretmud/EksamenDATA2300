@@ -18,6 +18,12 @@ Jeg har brukt git hensiktsmessig, ble litt lite commits i starten da jeg kom inn
 
 Totalt ble det # commits. 
 
+Det er 5 warnings i oppgaven som levers inn, mye av det koker ned til at det er tatt i brukt ø i koden som vi fikk utdelt, jeg valgte derfor å ikke gjøre om denne.
+
+inneholder() har jeg heller ikke tatt i bruk da jeg heller ønsket å gjøre alt selv.
+
+i leggInn(verdi) så klager intellij også på at jeg sjekker om verdien er null i starten, jeg velger å ikke fjerne denne delen heller da jeg sparer programmet for endel unødvendig arbeid. 
+
 ### Oppgave 1
 Blir løst ved å implementere traversering igjennom treet frem til du ender som en blad-node. 
 For hver sjekk bruker jeg comparison til å se om jeg skal legge ned nye noden som en blad-node til høyre eller venstre.
